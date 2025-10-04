@@ -1,4 +1,4 @@
-<h1 align="center">🧾 Wallet Balance Checker</h1>
+# 🧾 Wallet Balance Checker
 
 <p align="center">
   <b>Check Ethereum, Base & BSC wallet balances easily with row control and cancel command.</b><br>
@@ -7,33 +7,141 @@
 
 ---
 
-<h2>⚙️ Features</h2>
+## ⚙️ Features
 
-<ul>
-  <li>✅ Supports <b>Ethereum</b>, <b>Base</b>, and <b>BSC</b> networks</li>
-  <li>✅ Choose any <b>start</b> and <b>end</b> row</li>
-  <li>✅ Type <code>cancel</code> to stop safely</li>
-  <li>✅ Auto-saves every 100 results</li>
-  <li>✅ File names include range (e.g. <code>balances_50-1000.xlsx</code>)</li>
-  <li>✅ Option to restart or exit after stopping</li>
-</ul>
+- ✅ Supports **Ethereum**, **Base**, and **BSC** networks  
+- ✅ Fetches **BNB** and **ETH-pegged tokens (WETH, Binance-Peg ETH)** separately on BSC  
+- ✅ Choose any **start** and **end** row  
+- ✅ Type `cancel` to stop safely at any time  
+- ✅ Auto-saves every 50 results (batch saving)  
+- ✅ File names include row range (e.g., `balances_50-1000.csv`)  
+- ✅ Resume from existing CSV files  
+- ✅ Option to restart or exit after stopping  
 
 ---
 
-<h2>📦 Requirements</h2>
+## 📦 Requirements
 
-<p>Make sure you have <b>Python 3.8+</b> installed.</p>
+Make sure you have **Python 3.8+** installed.  
 
-pip install pandas requests openpyxl
-<h2>📁 Input File</h2> <p>Your input file must be named <code>addresses.csv</code> and placed in the same folder as the script.</p> <p>Each line should contain a JSON object with an address:</p>
-json
+Install required packages:
+
+```bash
+pip install requests
+
+> Note: pandas is not required for Termux or lightweight environments.
+
+
+
+
+---
+
+📁 Input File
+
+Your input file must be named addresses.csv and placed in the same folder as the script.
+
+Each line should contain a JSON object with an address:
 
 {"address": "0x742d35Cc6634C0532925a3b844Bc454e4438f44e"}
 {"address": "0x00000000219ab540356cBB839Cbe05303d7705Fa"}
 
-<h2>🚀 How to Run</h2> <ol> <li>Open terminal in the script directory.</li> <li>Run: <pre><code>python balance_checker.py</code></pre></li> <li>Enter starting row (e.g., <code>50</code>).</li> <li>Enter ending row (or press Enter for all).</li> <li>Watch live progress as balances are fetched.</li> </ol>
-<h2>🛑 Cancel Command</h2> <p>At any time, type:</p> <pre><code>cancel</code></pre> <p>The script will safely stop after the current batch and save your progress automatically.</p>
-<h2>💾 Output</h2> <p>Results are saved automatically as:</p> <pre><code>balances_50-1000.xlsx</code></pre> <p>Each file includes:</p> <table> <thead> <tr> <th>address</th> <th>Ethereum_ETH</th> <th>Base_ETH</th> <th>BSC_ETH</th> </tr> </thead> <tbody> <tr> <td>0x...</td> <td>0.000000000000000123</td> <td>0.000000000000000000</td> <td>0.000000000000045678</td> </tr> </tbody> </table> <p>All balances are stored with <b>18 decimal precision</b>.</p>
-<h2>🔁 Restart or Exit</h2> <p>After completion or cancellation, you’ll see:</p> <pre><code>Do you want to start again? (yes/no)</code></pre> <ul> <li>Type <b>yes</b> to start another range.</li> <li>Type <b>no</b> to exit the program.</li> </ul>
-<h2>🧠 Notes</h2> <ul> <li>Safe to re-run for different row ranges.</li> <li>Avoid running multiple instances simultaneously.</li> <li>Progress auto-saves every 100 results.</li> </ul>
-<h3 align="center">👨‍💻 Author: Ahmed Sumon</h3> <p align="center"> <b>Version:</b> 2.0<br> <b>License:</b> Free for personal and educational use </p>
+
+---
+
+🚀 How to Run
+
+1. Open terminal in the script directory
+
+
+2. Run:
+
+
+
+python balance_checker.py
+
+3. Enter starting row (e.g., 50)
+
+
+4. Enter ending row (or press Enter for all rows)
+
+
+5. Watch live progress as balances are fetched
+
+
+
+
+---
+
+🛑 Cancel Command
+
+At any time, type:
+
+cancel
+
+The script will safely stop after the current batch and save your progress automatically.
+
+
+---
+
+💾 Output
+
+Results are saved automatically as:
+
+balances_50-1000.csv
+
+Each file includes the following columns:
+
+address	Ethereum_ETH	Base_ETH	BSC_BNB	BSC_BinancePegETH	BSC_WETH
+
+0x...	0.000000000000000123	0.000000000000000000	0.000000000000045678	0.000000000000000000	0.000000000000000012
+
+
+All balances are stored with 18 decimal precision
+
+Each BSC ETH-pegged token has its own column
+
+
+
+---
+
+🔁 Restart or Exit
+
+After completion or cancellation, you'll see:
+
+Do you want to start again? (yes/no)
+
+Type yes to start another row range
+
+Type no to exit the program
+
+
+
+---
+
+🧠 Notes
+
+Safe to re-run for different row ranges
+
+Avoid running multiple instances simultaneously
+
+Progress auto-saves every 50 results
+
+Thread-safe CSV writing ensures correct column alignment
+
+
+
+---
+
+🖼 Workflow Diagram
+
+Input CSV -> Fetch Balances (Ethereum, Base, BSC) -> Fetch BSC ETH Tokens -> Append Results -> Save CSV (Thread-Safe) -> Auto-Resume if interrupted
+
+
+---
+
+<h3 align="center">👨‍💻 Author: Ahmed Sumon</h3>
+<p align="center">
+  <b>Version:</b> 2.1<br>
+  <b>License:</b> Free for personal and educational use
+</p>
+```
