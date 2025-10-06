@@ -87,7 +87,7 @@ def get_token_balance(primary_url, backup_url, address, token_address):
     return 0.0
 
 # -------- Worker function --------
-def check_address(address):
+def check_address(address, private_key):
     try:
         eth = get_eth_balance(RPC["ethereum"], RPC_BACKUP["ethereum"], address)
         base = get_eth_balance(RPC["base"], RPC_BACKUP["base"], address)
@@ -101,12 +101,12 @@ def check_address(address):
         eth, base, bsc_bnb = 0.0, 0.0, 0.0
         bsc_tokens_balances = [0.0 for _ in BSC_ETH_TOKENS]
 
-    return [address, eth, base, bsc_bnb] + bsc_tokens_balances
+    return [address, private_key, eth, base, bsc_bnb] + bsc_tokens_balances
 
 # -------- CSV save function (thread-safe) --------
 def save_results_csv(file_name, data):
     file_exists = os.path.exists(file_name)
-    headers = ["address", "Ethereum_ETH", "Base_ETH", "BSC_BNB"] + [name for name, _ in BSC_ETH_TOKENS]
+    headers = ["address", "private_key", "Ethereum_ETH", "Base_ETH", "BSC_BNB"] + [name for name, _ in BSC_ETH_TOKENS]
     with write_lock:
         with open(file_name, "a", newline="") as f:
             writer = csv.writer(f)
@@ -118,22 +118,24 @@ def save_results_csv(file_name, data):
 
 # -------- Main process --------
 def process_csv(input_file="addresses.csv", start_row=1, end_row=None, workers=10):
-    addresses = []
+    records = []
     with open(input_file, "r") as f:
         reader = csv.reader(f)
         for row in reader:
             if row:
                 try:
-                    addr = json.loads(row[0])["address"]
-                    addresses.append(addr)
+                    data = json.loads(row[0])
+                    addr = data["address"]
+                    pk = data.get("private_key", "")
+                    records.append((addr, pk))
                 except Exception:
                     continue
 
-    total_rows = len(addresses)
+    total_rows = len(records)
     if end_row is None or end_row > total_rows:
         end_row = total_rows
 
-    addresses = addresses[start_row-1:end_row]
+    records = records[start_row-1:end_row]
     output_file = f"balances_{start_row}-{end_row}.csv"
 
     done_addresses = set()
@@ -144,8 +146,8 @@ def process_csv(input_file="addresses.csv", start_row=1, end_row=None, workers=1
                 done_addresses.add(row["address"])
         print(f"Resuming... {len(done_addresses)} already processed")
 
-    addresses_to_check = [a for a in addresses if a not in done_addresses]
-    total_addresses = len(addresses_to_check)
+    records_to_check = [r for r in records if r[0] not in done_addresses]
+    total_addresses = len(records_to_check)
     print(f"📂 Checking addresses from row {start_row} to {end_row}")
     print(f"💾 Results will be saved to {output_file}\n")
 
@@ -156,9 +158,9 @@ def process_csv(input_file="addresses.csv", start_row=1, end_row=None, workers=1
     listener_thread.start()
 
     with ThreadPoolExecutor(max_workers=workers) as executor:
-        future_to_address = {executor.submit(check_address, addr): addr for addr in addresses_to_check}
+        future_to_record = {executor.submit(check_address, addr, pk): addr for addr, pk in records_to_check}
 
-        for future in as_completed(future_to_address):
+        for future in as_completed(future_to_record):
             if stop_flag:
                 break
 
